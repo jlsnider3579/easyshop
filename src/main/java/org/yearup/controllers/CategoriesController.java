@@ -2,6 +2,7 @@ package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ import java.util.List;
 // add annotation to allow cross site origin requests
 // DONE
 @RestController
-@RequestMapping(path = "/categories")
+@RequestMapping("/categories")
 @CrossOrigin
 public class CategoriesController
 {
@@ -46,11 +47,15 @@ public class CategoriesController
     // add the appropriate annotation for a get action
     //DONE
     @RequestMapping("/{id}")
-    public Category getById(@PathVariable int id)
-    {
+    public ResponseEntity<Category>  getById(@PathVariable int id) {
+
+        Category category = categoryDao.getById(id);
+        if (category == null){
+            return ResponseEntity.notFound().build();
+        }
         // get the category by id
         //DONE
-        return categoryDao.getById(id);
+        return ResponseEntity.ok(category);
     }
 
     // the url to return all products in category 1 would look like this
@@ -68,7 +73,7 @@ public class CategoriesController
     // add annotation to ensure that only an ADMIN can call this function
     //DONE
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/add")
+    @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public Category addCategory(@RequestBody Category category)
     {
@@ -95,8 +100,8 @@ public class CategoriesController
     // add annotation to ensure that only an ADMIN can call this function
     // DONE
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}/delete")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable int id)
     {
         // delete the category by id\

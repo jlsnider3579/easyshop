@@ -15,8 +15,8 @@ import java.util.List;
 @Component
 public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
 
-    //Change I made here was declaring the datasource so I can use it to make a connection
-    private DataSource dataSource;
+    //Change I made here was declaring the datasource, so I can use it to make a connection
+    //private DataSource dataSource;
 
     //Constructor
     public MySqlCategoryDao(DataSource dataSource) {
@@ -27,55 +27,48 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
     //Method to retrieve all categories
     public List<Category> getAllCategories() {
         ArrayList<Category> findCategories = new ArrayList<>();
-        int categoryId;
-        String name;
-        String description;
 
-        try (Connection connection = dataSource.getConnection()) {
+
+
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
-                    SELECT * FROM category
+                    SELECT * FROM categories;
                     """);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                categoryId = resultSet.getInt("category");
-                name = resultSet.getString("name");
-                description = resultSet.getString("description");
-
-                Category c = new Category(categoryId, name, description);
+                Category c = mapRow(resultSet);
                 findCategories.add(c);
-
             }
-
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        // get all categories
         return findCategories;
     }
 
     @Override
     public Category getById(int categoryId) {
-        ArrayList<Category> findCategoriesById = new ArrayList<>();
-        String name;
-        String description;
 
-        try (Connection connection = dataSource.getConnection()) {
+
+
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
-                    SELECT * FROM category WHERE category_id = ?
+                    SELECT * FROM categories WHERE category_id = ?;
                     """);
+            statement.setInt(1, categoryId);
             ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()){
+              int id = resultSet.getInt("category_id");
+              String name = resultSet.getString("name");
+              String description = resultSet.getString("description");
+              return new Category(id, name, description);
 
 
-            categoryId = resultSet.getInt("category");
-            name = resultSet.getString("name");
-            description = resultSet.getString("description");
-
-            Category c = new Category(categoryId, name, description);
+            }
 
             // get category by id
-            return c;
+            return null;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -86,21 +79,22 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
     public Category create(Category category) {
 
         ArrayList<Category> createCategory = new ArrayList<>();
-        String name = category.getName();
-        String description = category.getDescription();
 
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
                     INSERT INTO categories(name, description) VALUE (?, ?);
-                    """, Statement.RETURN_GENERATED_KEYS);
+                    """, PreparedStatement.RETURN_GENERATED_KEYS);
+            statement.setString(1, category.getName());
+            statement.setString(2, category.getDescription());
             statement.executeUpdate();
             ResultSet resultSet = statement.getGeneratedKeys();
 
             resultSet.next();
             int rows = resultSet.getInt(1);
 
+
             // create a new category
-            return new Category(rows, name, description);
+            return new Category(rows, category.getName(), category.getDescription());
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -111,7 +105,7 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
     @Override
     public void update(int categoryId, Category category) {
 
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
                     UPDATE categories
                     SET category_id = ?, name = ?, description = ?
@@ -132,13 +126,13 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
     @Override
     public void delete(int categoryId) {
 
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
                     DELETE FROM categories
                     WHERE category_id = ?;
                     """);
             statement.setInt(1, categoryId);
-            statement.execute();
+            statement.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
