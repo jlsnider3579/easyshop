@@ -7,6 +7,7 @@ import org.yearup.models.ShoppingCart;
 import org.yearup.models.ShoppingCartItem;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,7 +28,7 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
         try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
                     SELECT * FROM shopping_cart
-                    JOIN products ON products.product_id = shoppingCart.product_id
+                    JOIN products ON products.product_id = shopping_cart.product_id
                     WHERE user_id = ?
                     """);
             statement.setInt(1, userId);
@@ -35,18 +36,19 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
             while (resultSet.next()) {
                 ShoppingCartItem item = new ShoppingCartItem();
-                Product product = new Product();
 
-                resultSet.getInt("shopping_cart_product_id");
-                resultSet.getString("name");
-                resultSet.getBigDecimal("price");
-                resultSet.getInt("category_id");
-                resultSet.getString("description");
-                resultSet.getString("color");
-                resultSet.getString("image_url");
-                resultSet.getInt("stock");
-                int uId = resultSet.getInt("user_id");
-                int id = resultSet.getInt("id");
+                int shoppingCartProductId = resultSet.getInt("shopping_cart.product_id");
+                String name = resultSet.getString("name");
+                BigDecimal price = resultSet.getBigDecimal("price");
+                int categoryId = resultSet.getInt("category_id");
+                String description = resultSet.getString("description");
+                String color = resultSet.getString("color");
+                Boolean featured = resultSet.getBoolean("featured");
+                String imageUrl = resultSet.getString("image_url");
+                int stock = resultSet.getInt("stock");
+
+                Product product = new Product(shoppingCartProductId, name, price, categoryId, description, color, stock, featured, imageUrl);
+
                 int quantity = resultSet.getInt("quantity");
 
                 item.setProduct(product);
@@ -55,7 +57,7 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
                 shoppingCart.add(item);
 
             }
-            return new ShoppingCart();
+            return shoppingCart;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -68,13 +70,13 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
         try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO shopping_cart (user_id, product)
+                    INSERT INTO shopping_cart (user_id, product_id)
                     VALUE (?, ?);
                     """, PreparedStatement.RETURN_GENERATED_KEYS);
 
             statement.setInt(1, userId);
             statement.setInt(2, product.getProductId());
-            ResultSet resultSet = statement.executeQuery();
+            statement.executeUpdate();
 
             ShoppingCartItem item = new ShoppingCartItem();
             item.setProduct(product);
@@ -117,6 +119,7 @@ public class mySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
                     """);
             statement.setInt(1, userId);
             statement.executeUpdate();
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
