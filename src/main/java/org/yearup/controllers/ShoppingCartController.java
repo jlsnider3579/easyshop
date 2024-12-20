@@ -40,13 +40,17 @@ public class ShoppingCartController
     public ShoppingCart getCart(Principal principal) {
 
         try {
-            // get the currently logged-in username
+            // Get the currently logged-in username from the Principal object
             String userName = principal.getName();
-            // find database user by userId
+
+            // Find the corresponding User object from the database using the username
             User user = userDao.getByUserName(userName);
+
+            // Retrieve the user's ID to fetch their cart
             int userId = user.getId();
 
             // use the shoppingcartDao to get all items in the cart and return the cart
+            // Fetch and return the shopping cart associated with the user
             ShoppingCart cart = shoppingCartDao.getByUserId(userId);
             return cart;
         }
@@ -62,10 +66,16 @@ public class ShoppingCartController
     @ResponseStatus(code = HttpStatus.CREATED)
     public ShoppingCart addToCart(@PathVariable int productId, Principal principal){
 
+        // Get the logged-in user's username
         String userName = principal.getName();
+
+        // Fetch the User object associated with the username
         User user = userDao.getByUserName(userName);
+
+        // Retrieve the user's ID to associate the cart with the correct user
         int userId = user.getId();
 
+        // Add the product to the user's cart and return the updated cart
         return shoppingCartDao.addItemsToCart(userId, productDao.getById(productId));
     }
 
@@ -78,10 +88,16 @@ public class ShoppingCartController
     @PutMapping("/products/{productId}")
     public void updateShoppingCart(Principal principal, @RequestBody ShoppingCartItem item, @PathVariable int productId){
 
+        // Get the logged-in user's username
         String userName = principal.getName();
+
+        // Fetch the User object associated with the username
         User user = userDao.getByUserName(userName);
+
+        // Retrieve the user's ID to update the correct cart
         int userId = user.getId();
 
+        // Update the shopping cart with the new quantity of the product
         shoppingCartDao.updateCart(userId, item, productId);
 
     }
@@ -92,10 +108,16 @@ public class ShoppingCartController
     @DeleteMapping
     public ShoppingCart deleteShoppingCart(Principal principal){
 
+        // Get the logged-in user's username
         String userName = principal.getName();
+
+        // Fetch the User object associated with the username
         User user = userDao.getByUserName(userName);
+
+        // Retrieve the user's ID to delete the cart associated with the correct user
         int userId = user.getId();
 
+        // Delete the shopping cart for the user
         shoppingCartDao.deleteCart(userId);
 
         return shoppingCartDao.getByUserId(userId);
