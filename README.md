@@ -62,4 +62,9 @@ To further enhance the EasyShop platform, the following optional features can be
 
 ![image](https://github.com/user-attachments/assets/950daf85-e918-43d0-a9fc-db65327b6fbd)
 
+#### Interesting Code
+
+![Screenshot 2024-12-20 084722](https://github.com/user-attachments/assets/93eb3824-ad4f-4882-b16a-0a6b0497d414)
+
+
 
