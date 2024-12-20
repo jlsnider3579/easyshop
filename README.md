@@ -14,16 +14,16 @@ As a backend developer, you will work on the API that powers the EasyShop platfo
 - **Testing**: Postman, Unit Testing
 - **Version Control**: GitHub
 
-### Optional Features
+### Optional Features 
 To further enhance the EasyShop platform, the following optional features can be developed:
 
-#### Shopping Cart
+#### Shopping Cart 🛍️
 - Allow users to add, update, and delete items from their cart.
 
-#### User Profile
+#### User Profile 🪪
 - When a user registers for an account, a user profile record is automatically created in the profiles table.
 
-#### Checkout
+#### Checkout 🧾
 - Allow users to finalize their shopping process by converting their cart into an order.
 
 ---
@@ -44,7 +44,7 @@ To further enhance the EasyShop platform, the following optional features can be
 
 ---
 
-### Screenshots
+### Screenshots 📷
 
 #### Backend
 
